@@ -85,7 +85,7 @@ set CMD_LINE_ARGS=%*
 set CLASSPATH=%APP_HOME%\lib\dino-1.0-SNAPSHOT.jar;%APP_HOME%\lib\javafx-controls-11.0.2-mac.jar;%APP_HOME%\lib\javafx-graphics-11.0.2-mac.jar;%APP_HOME%\lib\javafx-graphics-11.0.2.jar;%APP_HOME%\lib\javafx-base-11.0.2-mac.jar;%APP_HOME%\lib\javafx-base-11.0.2.jar
 
 @rem Execute dino
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %DINO_OPTS%  -classpath "%CLASSPATH%" Game %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %DINO_OPTS%  -classpath "%CLASSPATH%" test1.Main %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell

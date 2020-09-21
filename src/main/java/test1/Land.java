@@ -9,7 +9,7 @@ public class Land extends Pane {
     Image pic;
     int w;
     int h;
-    int y = 410;
+    static int y = 410;
 
 
     public Land(int x) {

@@ -5,30 +5,29 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
+
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import java.awt.*;
+
 import java.io.InputStream;
-import javafx.scene.shape.Rectangle;
+
 import javafx.scene.layout.Pane;
 
 
 import java.util.Random;
-import java.util.stream.Collectors;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.image.ImageView;
 
-
+import java.util.HashMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 public class Main extends Application {
 
     static Pane root = new Pane();
-    static int speed = 7;
+    static int speed = 9;
 
 
     ImageView imageViewpaler = new ImageView(Res.imagerex);
@@ -37,14 +36,17 @@ public class Main extends Application {
     static ArrayList<Land> lands = new ArrayList<>();
     Random rand = new Random();
     private int lastblockx = 0;
+    private HashMap<KeyCode, Boolean> keys = new HashMap<>();
 
 
 
     private Parent createContent() {
         root.setPrefSize(1200, 500);
 
-        root.getChildren().addAll(player);
+        //root.getChildren().addAll(player);
         root.setStyle("-fx-background-color: #F7F7F7");
+
+
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -66,7 +68,19 @@ public class Main extends Application {
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");
         Image image = new Image(iconStream);
 
+        game.setOnKeyPressed(event -> {
+            KeyCode keyCode = event.getCode();
+            System.out.println(keyCode);
+            System.out.println("lol2");
+            keys.put(event.getCode(), true);
+            if (event.equals(KeyCode.Q)) {
+                System.out.println("lolsita");
 
+            }});
+        game.setOnKeyReleased(event -> {
+            System.out.println("lol1");
+            keys.put(event.getCode(), false);});
+        System.out.println("start");
         stage.getIcons().add(image);
         stage.setTitle("dino");
         stage.setScene(game);
@@ -99,6 +113,10 @@ public class Main extends Application {
     private void update() {
         for (Obsstacles s : cactuses) {
             s.moveLeft();
+            if (player.getBoundsInParent().intersects(s.getBoundsInParent())) {
+                player.animation.stop();
+                speed = 0;
+            }
             if (s.getTranslateX() < -100) {
                 root.getChildren().remove(s);
                 cactuses.pollFirst();
@@ -113,7 +131,21 @@ public class Main extends Application {
                 s.setTranslateX(lastblockx - 71);
             }
         }
+        if(isPressed(KeyCode.UP)){
+            System.out.println("lol");
+            player.jump();
+        }
+        if(player.deltajump < 40){
+            player.deltajump = player.deltajump+1;
+        }
+        player.moveY(player.deltajump);
     }
+
+
+    private Boolean isPressed(KeyCode key) {
+        return keys.getOrDefault(key, false);
+    }
+
 
 
     public static void main(String[] args) {

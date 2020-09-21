@@ -15,9 +15,10 @@ public class Character extends Pane{
     int offsetY = 0;
     int width = 88;
     int height = 94;
-    int score = 0;
-    Rectangle removeRect = null;
+    int deltajump = 0;
     SpriteAnimation animation;
+    private boolean canJump = true;
+
     public Character(ImageView imageView, int x, int y){
         this.imageView = imageView;
         this.imageView.setViewport(new Rectangle2D(offsetX,offsetY,width,height));
@@ -25,34 +26,29 @@ public class Character extends Pane{
         setTranslateX(x);
         setTranslateY(y);
         getChildren().addAll(imageView);
+        Main.root.getChildren().addAll(this);
     }
-//    public void moveX(int x){
-//        boolean right = x>0?true:false;
-//        for(int i = 0; i < Math.abs(x); i++) {
-//            if (right) this.setTranslateX(this.getTranslateX() + 1);
-//            else this.setTranslateX(this.getTranslateX() - 1);
-//            isBonuseEat();
-//        }
-//    }
-//    public void moveY(int y) {
-//        boolean down = y > 0 ? true : false;
-//        for (int i = 0; i < Math.abs(y); i++) {
-//            if (down) this.setTranslateY(this.getTranslateY() + 1);
-//            else this.setTranslateY(this.getTranslateY() - 1);
-//            isBonuseEat();
-//        }
-//    }
-//
-//    public void isBonuseEat(){
-//        Main.bonuses.forEach((rect) -> {
-//            if (this.getBoundsInParent().intersects(rect.getBoundsInParent())) {
-//                removeRect = rect;
-//                score++;
-//                System.out.println(score);
-//            }
-//
-//        });
-//        Main.bonuses.remove(removeRect);
-//        Main.root.getChildren().remove(removeRect);
-//    }
+    public void moveY(int val) {
+        boolean movingDown = val > 0;
+        for(int i = 0; i < Math.abs(val); i++) {
+            if (this.getTranslateY() < 150 && !movingDown) {
+                return;
+            }
+            if (this.getTranslateY() > 350 && movingDown) {
+                canJump = true;
+                deltajump = 40;
+                return;
+
+            }
+            this.setTranslateY(this.getTranslateY() + (movingDown?1:-1));
+            System.out.println(deltajump);
+        }
+    }
+
+    public void jump() {
+        if(canJump){
+            deltajump = -20;
+            canJump = false;
+        }
+    }
 }
