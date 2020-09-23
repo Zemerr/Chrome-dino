@@ -23,74 +23,145 @@ import javafx.scene.image.ImageView;
 import java.util.HashMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import javafx.scene.control.Label;
+import javafx.scene.text.*;
+
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.util.Duration;
+
+
+
+
+import java.sql.SQLException;
+import javafx.scene.paint.Color;
+
+
+
 
 public class Main extends Application {
 
     static Pane root = new Pane();
-    static int speed = 9;
-
-
+    static int speed = 8;
+    static boolean gameover = false;
     ImageView imageViewpaler = new ImageView(Res.imagerex);
-    Character player = new Character(imageViewpaler, 40, 350);
+    Character player = new Character(imageViewpaler, 40, 345);
     public static ArrayDeque<Obsstacles> cactuses = new ArrayDeque<>();
     static ArrayList<Land> lands = new ArrayList<>();
     Random rand = new Random();
     private int lastblockx = 0;
     private HashMap<KeyCode, Boolean> keys = new HashMap<>();
+    Label score = new Label();
+    static int scorenum = 0;
+    static int old_score = 0;
+    Label hiscore = new Label();
+    AnimationTimer timer;
+    private boolean sv = true;
+    Label startlab = new Label();
+
+    boolean menu = true;
 
 
 
-    private Parent createContent() {
+
+
+    final Timeline timeline = new Timeline(
+            new KeyFrame(
+                    Duration.millis( 150 ),
+                    event -> {
+                        score.setText(Long.toString(scorenum));
+                        scorenum++;
+                        if (scorenum%25==0)
+                            speed +=1;
+                    }
+            )
+    );
+
+
+
+
+
+
+
+
+    private Parent createContent() throws ClassNotFoundException, SQLException {
         root.setPrefSize(1200, 500);
-
-        //root.getChildren().addAll(player);
         root.setStyle("-fx-background-color: #F7F7F7");
 
-
-
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer()  {
             @Override
             public void handle(long now) {
-              update();
+                try {
+                    update();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         };
-        timer.start();
+
         land();
         obsticles();
+        score.setTranslateX(1000);
+        score.setTranslateY(100);
+
         player.toFront();
+        score.setText("0");
+        score.setFont(Font.loadFont( getClass().getResource("/Dinofont.ttf").toExternalForm(), 40));
+        score.setTextFill(Color.web("#535353"));
+        hiscore.setFont(Font.loadFont( getClass().getResource("/Dinofont.ttf").toExternalForm(), 40));
+        hiscore.setTranslateX(600);
+        hiscore.setTranslateY(100);
+        hiscore.setTextFill(Color.web("#535353"));
+        hiscore.setText("HI  " + old_score);
+        hiscore.setWrapText(true);
+
+        timeline.setCycleCount( Timeline.INDEFINITE );
+
+        startlab.setFont(Font.loadFont( getClass().getResource("/Dinofont.ttf").toExternalForm(), 40));
+        startlab.setTranslateX(300);
+        startlab.setTranslateY(100);
+        startlab.setTextFill(Color.web("#535353"));
+        startlab.setText("START");
+
+        root.getChildren().add(hiscore);
+        root.getChildren().add(score);
+        root.getChildren().add(startlab);
+
+
+
+        timeline.play();
+        timer.start();
+        player.animation.play();
+
+
+
         return root;
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws Exception, ClassNotFoundException, SQLException {
 
         Scene game = new Scene(createContent());
         InputStream iconStream = getClass().getResourceAsStream("/icon.png");
         Image image = new Image(iconStream);
 
         game.setOnKeyPressed(event -> {
-            KeyCode keyCode = event.getCode();
-            System.out.println(keyCode);
-            System.out.println("lol2");
-            keys.put(event.getCode(), true);
-            if (event.equals(KeyCode.Q)) {
-                System.out.println("lolsita");
-
-            }});
+            keys.put(event.getCode(), true); });
         game.setOnKeyReleased(event -> {
-            System.out.println("lol1");
             keys.put(event.getCode(), false);});
-        System.out.println("start");
+
         stage.getIcons().add(image);
         stage.setTitle("dino");
+
         stage.setScene(game);
-        player.animation.play();
+
         stage.show();
     }
 
     private void obsticles() {
         int X = 0;
-        double type = Math.random();
 
         for (int i = 0; i < 5; i++) {
             int nextX = rand.nextInt(400) + 400;
@@ -99,6 +170,7 @@ public class Main extends Application {
             else
                 X = (int)cactuses.getLast().getTranslateX() + nextX;
             Obsstacles cactus = new Obsstacles(X);
+
         }
     }
 
@@ -110,35 +182,53 @@ public class Main extends Application {
     }
 
 
-    private void update() {
-        for (Obsstacles s : cactuses) {
-            s.moveLeft();
-            if (player.getBoundsInParent().intersects(s.getBoundsInParent())) {
-                player.animation.stop();
-                speed = 0;
+    private void update() throws ClassNotFoundException, SQLException {
+        if (gameover == false) {
+            for (Obsstacles s : cactuses) {
+                s.moveLeft();
+                if (player.getTranslateX() >= s.getTranslateX() && player.getTranslateX() <= s.getTranslateX() + s.getWidth() - (s.getWidth())/2
+                        || player.getTranslateX() + player.getWidth() - 25 >= s.getTranslateX() && player.getTranslateX() + player.getWidth() - 25 <= s.getTranslateX() + s.getWidth())
+                {
+                    if (player.getTranslateY() + player.getHeight() >= s.getTranslateY()
+                            && player.getTranslateY() + player.getHeight() <= s.getTranslateY() + s.getHeight())
+                    {
+                        player.animation.stop();
+                        timeline.stop();
+                        gameover = true;
+                        if (sv && db.saving)
+                            if (scorenum - 1 > old_score)
+                                db.WriteDB(scorenum - 1);
+
+                        timer.stop();
+
+                    }
+                }
+
+                if (s.getTranslateX() < -100) {
+                    root.getChildren().remove(s);
+
+                    cactuses.pollFirst();
+                    int nextX = rand.nextInt(700) + 400;
+                    Obsstacles n = new Obsstacles((int)cactuses.getLast().getTranslateX() + nextX);
+                }
             }
-            if (s.getTranslateX() < -100) {
-                root.getChildren().remove(s);
-                cactuses.pollFirst();
-                int nextX = rand.nextInt(700) + 400;
-                Obsstacles n = new Obsstacles((int)cactuses.getLast().getTranslateX() + nextX);
+            for (int i = 0; i < lands.size(); i++) {
+                Land s = lands.get(i);
+                s.moveLeft();
+                if (s.getTranslateX() < -50) {
+                    s.setTranslateX(lastblockx - 71);
+                }
             }
-        }
-        for (int i = 0; i < lands.size(); i++) {
-            Land s = lands.get(i);
-            s.moveLeft();
-            if (s.getTranslateX() < -50) {
-                s.setTranslateX(lastblockx - 71);
+            if(isPressed(KeyCode.UP)) {
+                player.jump();
             }
+            if(player.deltajump < 40){
+                player.deltajump = player.deltajump+1;
+            }
+            player.moveY(player.deltajump);
+
         }
-        if(isPressed(KeyCode.UP)){
-            System.out.println("lol");
-            player.jump();
-        }
-        if(player.deltajump < 40){
-            player.deltajump = player.deltajump+1;
-        }
-        player.moveY(player.deltajump);
+
     }
 
 
@@ -148,7 +238,9 @@ public class Main extends Application {
 
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+
+        db.CreateDB();
         launch(args);
     }
 }

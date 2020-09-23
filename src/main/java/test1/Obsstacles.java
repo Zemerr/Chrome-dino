@@ -4,7 +4,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 
-import java.io.InputStream;
+
 
 public class Obsstacles extends Pane {
 
@@ -22,9 +22,9 @@ public class Obsstacles extends Pane {
         block = new ImageView(pic);
         setTranslateX(x);
         setTranslateY(y);
-        //block.setImage(pics);
         block.setFitWidth(w);
         block.setFitHeight(h);
+        
 
         getChildren().add(block);
         Main.root.getChildren().add(this);

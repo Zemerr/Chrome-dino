@@ -19,7 +19,7 @@ public class Character extends Pane{
     SpriteAnimation animation;
     private boolean canJump = true;
 
-    public Character(ImageView imageView, int x, int y){
+    public Character(ImageView imageView, int x, int y) {
         this.imageView = imageView;
         this.imageView.setViewport(new Rectangle2D(offsetX,offsetY,width,height));
         animation = new SpriteAnimation(imageView,Duration.millis(300),count,columns,offsetX,offsetY,width,height);
@@ -34,19 +34,21 @@ public class Character extends Pane{
             if (this.getTranslateY() < 150 && !movingDown) {
                 return;
             }
-            if (this.getTranslateY() > 350 && movingDown) {
+            if (this.getTranslateY() > 345 && movingDown) {
+                if (canJump == false)
+                    animation.play();
                 canJump = true;
                 deltajump = 40;
                 return;
 
             }
             this.setTranslateY(this.getTranslateY() + (movingDown?1:-1));
-            System.out.println(deltajump);
         }
     }
 
     public void jump() {
         if(canJump){
+            animation.pause();
             deltajump = -20;
             canJump = false;
         }
