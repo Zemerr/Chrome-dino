@@ -21,4 +21,10 @@ javafx {
 }
 
 
-mainClassName = 'test1.Main'
+mainClassName = 'world.ucode.Main'
+
+//plugins.withType(JavaPlugin).configureEach {
+//    java {
+//        modularity.inferModulePath = true
+//    }
+//}

@@ -1,4 +1,4 @@
-package test1;
+package world.ucode;
 
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;

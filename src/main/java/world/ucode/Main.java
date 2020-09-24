@@ -1,8 +1,6 @@
-package test1;
+package world.ucode;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
@@ -58,6 +56,7 @@ public class Main extends Application {
     AnimationTimer timer;
     private boolean sv = true;
     Label startlab = new Label();
+    Label gameoverlab = new Label();
 
     boolean menu = true;
 
@@ -119,21 +118,23 @@ public class Main extends Application {
 
         timeline.setCycleCount( Timeline.INDEFINITE );
 
-        startlab.setFont(Font.loadFont( getClass().getResource("/Dinofont.ttf").toExternalForm(), 40));
-        startlab.setTranslateX(300);
-        startlab.setTranslateY(100);
+        startlab.setFont(Font.loadFont( getClass().getResource("/Dinofont.ttf").toExternalForm(), 60));
+        startlab.setTranslateX(450);
+        startlab.setTranslateY(130);
         startlab.setTextFill(Color.web("#535353"));
         startlab.setText("START");
 
-        root.getChildren().add(hiscore);
-        root.getChildren().add(score);
+        gameoverlab.setFont(Font.loadFont( getClass().getResource("/Dinofont.ttf").toExternalForm(), 60));
+        gameoverlab.setTranslateX(350);
+        gameoverlab.setTranslateY(130);
+        gameoverlab.setTextFill(Color.web("#535353"));
+        gameoverlab.setText("GAME OVER");
+
+
         root.getChildren().add(startlab);
 
 
 
-        timeline.play();
-        timer.start();
-        player.animation.play();
 
 
 
@@ -148,15 +149,32 @@ public class Main extends Application {
         Image image = new Image(iconStream);
 
         game.setOnKeyPressed(event -> {
-            keys.put(event.getCode(), true); });
+            KeyCode keyCode = event.getCode();
+
+            if (menu == true) {
+                if (keyCode.equals(KeyCode.SPACE) || keyCode.equals(KeyCode.UP) || keyCode.equals(KeyCode.ENTER)) {
+                    if (gameover == true) {
+                        renew();
+                    }
+                    else
+                        root.getChildren().remove(startlab);
+                    root.getChildren().add(hiscore);
+                    root.getChildren().add(score);
+                    timeline.play();
+                    timer.start();
+                    player.animation.play();
+                    menu = false;
+                }
+            }
+            else {
+                keys.put(keyCode, true);
+            }
+        });
         game.setOnKeyReleased(event -> {
             keys.put(event.getCode(), false);});
-
         stage.getIcons().add(image);
         stage.setTitle("dino");
-
         stage.setScene(game);
-
         stage.show();
     }
 
@@ -181,6 +199,17 @@ public class Main extends Application {
         }
     }
 
+    private void renew() {
+        cactuses.forEach(c -> {root.getChildren().remove(c);});
+        root.getChildren().remove(gameoverlab);
+        cactuses.clear();
+        scorenum = 0;
+        obsticles();
+        sv = db.saving = true;
+        speed = 8;
+        gameover = false;
+    }
+
 
     private void update() throws ClassNotFoundException, SQLException {
         if (gameover == false) {
@@ -196,11 +225,17 @@ public class Main extends Application {
                         timeline.stop();
                         gameover = true;
                         if (sv && db.saving)
-                            if (scorenum - 1 > old_score)
+                            if (scorenum - 1 > old_score) {
                                 db.WriteDB(scorenum - 1);
+                                old_score = scorenum - 1;
+                                hiscore.setText("HI  " + old_score);
+                            }
 
                         timer.stop();
-
+                        menu = true;
+                        root.getChildren().remove(hiscore);
+                        root.getChildren().remove(score);
+                        root.getChildren().add(gameoverlab);
                     }
                 }
 
@@ -214,10 +249,11 @@ public class Main extends Application {
             }
             for (int i = 0; i < lands.size(); i++) {
                 Land s = lands.get(i);
-                s.moveLeft();
+
                 if (s.getTranslateX() < -50) {
                     s.setTranslateX(lastblockx - 71);
                 }
+                s.moveLeft();
             }
             if(isPressed(KeyCode.UP)) {
                 player.jump();
