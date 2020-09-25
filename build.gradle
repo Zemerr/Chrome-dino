@@ -21,7 +21,7 @@ javafx {
 }
 
 
-mainClassName = 'world.ucode.Main'
+mainClassName = 'dino.main/world.ucode.Main'
 
 //plugins.withType(JavaPlugin).configureEach {
 //    java {

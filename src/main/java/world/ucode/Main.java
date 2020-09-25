@@ -197,11 +197,16 @@ public class Main extends Application {
             Land blocks = new Land(lastblockx);
             lastblockx += 71;
         }
+        player.toFront();
     }
 
     private void renew() {
         cactuses.forEach(c -> {root.getChildren().remove(c);});
         root.getChildren().remove(gameoverlab);
+        lands.forEach(c -> {root.getChildren().remove(c);});
+        lands.clear();
+        lastblockx = 0;
+        land();
         cactuses.clear();
         scorenum = 0;
         obsticles();
